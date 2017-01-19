@@ -1,0 +1,17 @@
+---
+title: "README"
+author: "Matthias Aulbach"
+date: "19 Januar 2017"
+output: html_document
+---
+
+# Open Data Science
+The course is about open data science, with a special emphasis on R, and RStudio in particular. It's a powerful tool to 
+1. analyze data
+2. create plots to show your results
+3. create content in html-format and many others
+4. and much more
+
+# github
+Every student in the course needs to create a github account to share their assignments.
+Here's the link to my github repository: https://matthiasaulbach.github.io/IODS-project/

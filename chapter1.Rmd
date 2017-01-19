@@ -2,3 +2,17 @@
 # About the project
 
 *Write a short description about the course and add a link to your github repository here. This is an R markdown (.Rmd) file so you can use R markdown syntax. See the 'Useful links' page in the mooc area (chapter 1) for instructions.*
+
+# Open Data Course
+This is a course to get started on Open Data Science, an issue very much pushed by the University of Helsinki. I'm particularly interested in learning to use R for analyzing my research data that I will collect in the course of my PhD.
+
+## Assignments
+It seems like there's going to be a lot of work to be done throughout the course but I guess that's the only way to really learn how to use all the tools. **No pain, no gain!**
+
+The assignments include:
+1. Datacamp exercises
+2. R exercises
+3. Uploading your stuff to github and providing a link to the repository
+
+## Link to the github repository
+Here's the link to my github repository: https://github.com/matthiasaulbach/IODS-project/
