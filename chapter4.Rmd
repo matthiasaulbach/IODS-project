@@ -1,0 +1,104 @@
+---
+title: "Week 4"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Week 4 - Clustering and Classification
+## Exploring the dataset
+```{r, echo = FALSE, include=FALSE}
+library("dplyr")
+library("ggplot2")
+library(tidyr)
+library(tidyverse)
+library(corrplot)
+library (MASS)
+data(Boston)
+str(Boston)
+dim(Boston)
+```
+
+The "Boston" dataset consists of 14 variables with 506 observations for each variable. The variables cover different properties of housing areas. 
+
+```{r}
+pairs(Boston)
+summary(Boston)
+cor_matrix<-cor(Boston) %>% round (digits = 2)
+cor_matrix
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+```
+
+In the plot of the correlations, we can see that "dis", the weighted mean of distances to five Boston employment centres, is strongly negatively related to "nox", the nitrogen oxides concentration (parts per 10 million) and "indus", the proportion of non-retail business acres per town. So the farther a place is from employment centres, the less polluted is the air and the lower the proportion of non-retail business. Also, "dis" and "age" are highly negatively correlated: the higher the proportion of owner-occupied units built prior to 1940, the smaller the distance to an emplyment center.
+
+In addition, we find a strong positive correlation between "rad" and "tax", indicating that the more accesible the area in relation to radial highways, the higher the full-value property-tax rate.
+
+More correlations can be seen in the correlation matrix.
+
+## Standardizing the data
+```{r}
+boston_scaled <- scale (Boston)
+summary(boston_scaled)
+boston_scaled <- as.data.frame(boston_scaled)
+bins <- quantile (boston_scaled$crim)
+bins
+crime <- cut(boston_scaled$crim, breaks = bins, label = c("low", "med_low", "med_high", "high"), include.lowest = TRUE)
+boston_scaled <- dplyr::select(boston_scaled, -crim)
+boston_scaled <- data.frame(boston_scaled, crime)
+```
+## Dividing the dataset into training and test sets
+```{r}
+n <- nrow(boston_scaled)
+ind <- sample(n,  size = n * 0.8)
+train <- boston_scaled[ind,]
+test <- boston_scaled[-ind,]
+correct_classes <- test$crime
+test <- dplyr::select(test, -crime)
+```
+
+## Linear Discriminant Analysis
+```{r}
+lda.fit <- lda (crime ~ ., data = train)
+lda.fit
+lda.graph <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+classes <- as.numeric(train$crime)
+plot(lda.fit, dimen = 2, col = classes, pch = classes)
+lda.graph(lda.fit, myscale = 2)
+```
+
+We can see from the plot that high crime rate areas are very distinct from all other areas, mainly distinguisehd by LD 1 which, in turn, largely represents "rad", an index of accessibility to radial highways. I.e., places that have very low accessibility to radial highways, are very likely to have a high crime rate.
+The other three quantiles are mainly differentiated from each other by LD2 which is hevily influenced by "zn" and "nox": the proportion of residential land zoned for lots over 25,000 sq.ft and nitrogen oxides concentration (parts per 10 million), respectively. The lowest crime rates are therefore to be expected in areas that have a high proportion of big lots of land and a low nitrogen oxides concentration (Both should be true for areas far from city centers).
+## Predicting classes with the LDA model
+```{r}
+lda.pred <- predict(lda.fit, newdata = test)
+table(correct = correct_classes, predicted = lda.pred$class)
+```
+
+We can see that the majority of cases have been classified correctly. However, as expected from the graph, the distinction between low, med_low, and med_high is not very good; many cases have been predicted wrong. For the highest quantile, the prediction was perfect: all 21 cases were predicted correctly.
+
+## Distances between observations and k-means
+```{r}
+data ('Boston')
+scale (Boston)
+dist_eu <- dist(Boston)
+km <- kmeans(dist_eu, centers = 5)
+set.seed(123)
+k_max <- 10
+twcss <- sapply(1:k_max, function(k){kmeans(dist_eu, k)$tot.withinss})
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+km <-kmeans(dist_eu, centers = 2)
+pairs(Boston, col = km$cluster)
+```
+
+From the q-plot, we can clearly see that 2 is the optimal number of clusters. Therefore, I created the plot to visualize the clusters. As we can see here, two clusters don't optimally differentiate for all variables: e.g. in the relation between "nox" and "lstat" we can see that members of the clusters are very mixed up.
