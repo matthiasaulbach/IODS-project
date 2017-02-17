@@ -1,11 +1,11 @@
 ---
-title: "Week 4"
+title: "chapter4"
 output:
   html_document: default
   pdf_document: default
 ---
 
-```{r setup, include=FALSE}
+```{r basics, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -25,7 +25,7 @@ dim(Boston)
 
 The "Boston" dataset consists of 14 variables with 506 observations for each variable. The variables cover different properties of housing areas. 
 
-```{r}
+```{r exploring}
 pairs(Boston)
 summary(Boston)
 cor_matrix<-cor(Boston) %>% round (digits = 2)
@@ -33,14 +33,12 @@ cor_matrix
 corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
 ```
 
-In the plot of the correlations, we can see that "dis", the weighted mean of distances to five Boston employment centres, is strongly negatively related to "nox", the nitrogen oxides concentration (parts per 10 million) and "indus", the proportion of non-retail business acres per town. So the farther a place is from employment centres, the less polluted is the air and the lower the proportion of non-retail business. Also, "dis" and "age" are highly negatively correlated: the higher the proportion of owner-occupied units built prior to 1940, the smaller the distance to an emplyment center.
-
-In addition, we find a strong positive correlation between "rad" and "tax", indicating that the more accesible the area in relation to radial highways, the higher the full-value property-tax rate.
-
+In the plot of the correlations, we can see that *dis*, the weighted mean of distances to five Boston employment centres, is strongly negatively related to *nox*, the nitrogen oxides concentration (parts per 10 million) and *indus*, the proportion of non-retail business acres per town. So the farther a place is from employment centres, the less polluted is the air and the lower the proportion of non-retail business. Also, *dis* and *age* are highly negatively correlated: the higher the proportion of owner-occupied units built prior to 1940, the smaller the distance to an emplyment center.
+In addition, we find a strong positive correlation between *rad* and *tax*, indicating that the more accesible the area in relation to radial highways, the higher the full-value property-tax rate.
 More correlations can be seen in the correlation matrix.
 
 ## Standardizing the data
-```{r}
+```{r standardizing}
 boston_scaled <- scale (Boston)
 summary(boston_scaled)
 boston_scaled <- as.data.frame(boston_scaled)
@@ -50,6 +48,7 @@ crime <- cut(boston_scaled$crim, breaks = bins, label = c("low", "med_low", "med
 boston_scaled <- dplyr::select(boston_scaled, -crim)
 boston_scaled <- data.frame(boston_scaled, crime)
 ```
+
 ## Dividing the dataset into training and test sets
 ```{r}
 n <- nrow(boston_scaled)
@@ -88,10 +87,14 @@ table(correct = correct_classes, predicted = lda.pred$class)
 We can see that the majority of cases have been classified correctly. However, as expected from the graph, the distinction between low, med_low, and med_high is not very good; many cases have been predicted wrong. For the highest quantile, the prediction was perfect: all 21 cases were predicted correctly.
 
 ## Distances between observations and k-means
-```{r}
+```{r, echo = FALSE, include = FALSE}
 data ('Boston')
+```
+```{r, echo = FALSE, include = FALSE}
 scale (Boston)
 dist_eu <- dist(Boston)
+```
+```{r means}
 km <- kmeans(dist_eu, centers = 5)
 set.seed(123)
 k_max <- 10
