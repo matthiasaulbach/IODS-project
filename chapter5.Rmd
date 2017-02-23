@@ -1,0 +1,108 @@
+---
+title: "chapter5"
+author: "Matthias Aulbach"
+date: "20 Februar 2017"
+output: 
+  html_document:
+    code_folding: hide
+    
+---
+
+```{r chapter5, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, error = FALSE)
+```
+
+# Week 5
+## Loading exploring the data
+```{r echo=F, include = F}
+human <- read.table("human")
+str(human)
+dim(human)
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+```
+The "human" dataset consists of 8 variables that describe different aspects of human development with a strong emphasis on equality between men and women. The variables indexing equality are mainly the share of women with secondary education compared to men ("Edu2.FM"), the proportion of women in the labor force compared to proportion of men in the laborforce ("Labo.FM"), and the share of female members of parliament ("Parli.F").
+
+## Summary and overview
+```{r}
+summary(human)
+ggplot(pairs(human))
+cor_matrix <- cor(human) %>% round (digits = 2)
+cor_matrix
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+```
+
+We can see that all variables differ widely. For example, the proportion of women with secondary education to men with secondar education ranges from 0.17 to 1.50, with a mean of .85 and a median of .94, indicating that in most countries, men have a higher chance of getting secondary education. The 3rd quartile ends at 1.00, indicating that in about 75% of countries, men have a higher chance of secondary education than women.
+The range in parliamentary representation is similarly clear: it ranges from 0 to 57.5%, with the 3rd quartile ranging at 28%. On average, 21% of PMs are women.
+We can clearly see correlations between expected years of education and life expectancy, as well as expected education and maternal mortality as well as adolescent birth rate.
+The correlation between maternal mortality and life expectancy is trivial: the more mothers die during birth, the lower the life expectancy.
+We find a strong correlation between expected duration of education and life expectancy: the more educated a country's population, the longer their lives. 
+See the table for more correlations.
+## Principal Component Analysis
+### With non-standardized data
+```{r}
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+s <- summary(pca_human)
+s
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+pca_pr
+paste0(names(pca_pr), " (", pca_pr, "%)")
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+pc_lab
+# draw a biplot
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+
+We can clearly see from this analysis that analysis of non-standardized data doesn't make any sense: since GNI is a factor with arbitrary reference, it is much larger than the other variables in absolute numbers and therefore explains all the variance. Its effects completely "swallow" effects of other variables.
+### With standardized data
+```{r}
+human <- scale (human)
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+s <- summary(pca_human)
+s
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+pca_pr
+paste0(names(pca_pr), " (", pca_pr, "%)")
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+pc_lab
+# draw a biplot
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+```
+
+After standardizing the data, the analysis makes much more sense. We can see that PC1 accounts for 53.6% of the variance and PC2 for 16.2%. We can also see that all variables but *Labo.FM* and *Parli.F* differentiate between countries on the PC1 dimension. *Labo.FM* and *Parli.F* differentiate on the PC 2 dimension and are correlated: the proportion of women in the workforce and the share of female MPs.
+This indicates that we can differentiate between countries in regard to their  representation of women in the labor market and parliament on the one hand, and all other variables in the dataset on the other hand.
+We might therefore consider PC2 as "female representation" and PC1 as "health and education development".
+
+## Tea dataset
+```{r}
+library(FactoMineR)
+library(tidyr)
+data(tea)
+str(tea)
+dim(tea)
+```
+
+The "tea" dataset contains 300 observations of 36 variables indicating participants' habits concerning tea consumption (How British!). I will focus on a few key variables here that I find interesting: "effect.on.health", "relaxing", "exciting", "slimming", and "sophisticated" since I'm interested in why people drink tea.
+
+```{r}
+keep <- c("effect.on.health", "relaxing", "exciting", "slimming", "sophisticated")
+tea <- select(tea, one_of(keep))
+str(tea)
+dim(tea)
+gather(tea) %>% ggplot(aes(value)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free")
+```
+
+We can see here that most people think it's sophisticated, and relaxing. Most people don't find it exciting, expect an effect on health or think it is slimming.
+
+## Dimension of tea
+```{r}
+mca <- MCA(tea, graph = FALSE)
+summary(mca)
+plot(mca, invisible=c("ind"), habillage = "quali")
+```
+
+From the Multiple Correspondence Analysis, we infer that the items seem indeed to refer to different dimensions, indicated by the fact that the Eigenvalues of the dimensions are of comparable size for all five dimensions.
+In the plot of the first two dimensions, we can see that "slimming" is somewhat of an outlier and - to a fewer extent - "not sophisticated". The other items group around 0. So while these two dimensions might in fact differentiate between "slimming" and "non-slimming", and "sophisiticated" and "not sophisticated", they can barely distinguish between the other items.
