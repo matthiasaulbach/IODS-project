@@ -27,7 +27,7 @@ The "human" dataset consists of 8 variables that describe different aspects of h
 ## Summary and overview
 ```{r}
 summary(human)
-ggplot(pairs(human))
+pairs(human)
 cor_matrix <- cor(human) %>% round (digits = 2)
 cor_matrix
 corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
@@ -80,6 +80,7 @@ We might therefore consider PC2 as "female representation" and PC1 as "health an
 ```{r}
 library(FactoMineR)
 library(tidyr)
+library(dplyr)
 data(tea)
 str(tea)
 dim(tea)
@@ -89,7 +90,7 @@ The "tea" dataset contains 300 observations of 36 variables indicating participa
 
 ```{r}
 keep <- c("effect.on.health", "relaxing", "exciting", "slimming", "sophisticated")
-tea <- select(tea, one_of(keep))
+tea <- dplyr::select(tea, one_of(keep))
 str(tea)
 dim(tea)
 gather(tea) %>% ggplot(aes(value)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("key", scales = "free")

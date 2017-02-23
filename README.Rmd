@@ -14,4 +14,4 @@ The course is about open data science, with a special emphasis on R, and RStudio
 
 # github
 Every student in the course needs to create a github account to share their assignments.
-Here's the link to my github repository: https://matthiasaulbach.github.io/IODS-project/
+Here's the link to my course diary: https://matthiasaulbach.github.io/IODS-project/
