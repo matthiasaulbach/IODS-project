@@ -5,6 +5,8 @@ date: "19 Januar 2017"
 output: html_document
 ---
 
+I'm really trying!
+
 # Open Data Science
 The course is about open data science, with a special emphasis on R, and RStudio in particular. It's a powerful tool to 
 1. analyze data
